@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
+import random
 
 from cv2 import cv2
 import numpy as np
 from time import sleep
 import argparse
 
+# (450, 900, 650, 1000)
 parser = argparse.ArgumentParser()
-parser.add_argument('-v', '--video_source', dest='video_source', help="Arquivo de origem do vídeo ou índice da câmera alvo", default="video.mp4")
-parser.add_argument('-r', '--region_of_interest', dest='roi', help="Região de interesse (start_x, start_y, end_x, end_y,)", default=(375, 275, 950, 550))
-parser.add_argument('-cfg', '--model_cfg', dest='cfg', help="Arquivo de configuração da rede YOLOv3", default="yolov3.cfg")
-parser.add_argument('-w', '--model_weights', dest='weights', help="Arquivo de pesos da rede YOLOv3", default="yolov3.weights")
+parser.add_argument('-v', '--video_source', dest='video_source',
+                    help="Arquivo de origem do vídeo ou índice da câmera alvo", default="video.mp4")
+parser.add_argument('-r', '--region_of_interest', dest='roi',
+                    help="Região de interesse (start_x, start_y, end_x, end_y,)", default=(150, 300, 1500, 800))
+parser.add_argument('-cfg', '--model_cfg', dest='cfg', help="Arquivo de configuração da rede YOLOv3",
+                    default="yolov3.cfg")
+parser.add_argument('-w', '--model_weights', dest='weights', help="Arquivo de pesos da rede YOLOv3",
+                    default="yolov3.weights")
 parser.add_argument('-s', '--scale', dest='scale', help="Escala da rede", default=320)
-parser.add_argument('-ct', '--confidence_threshold', dest='ct', help="Tolerância de confiabilidade das detecções", default=.5)
-parser.add_argument('-nms', '--nms_threshold', dest='nms', help="Tolerância de caixas limitantes sobrepostas", default=0)
+parser.add_argument('-ct', '--confidence_threshold', dest='ct', help="Tolerância de confiabilidade das detecções",
+                    default=.05)
+parser.add_argument('-nms', '--nms_threshold', dest='nms', help="Tolerância de caixas limitantes sobrepostas",
+                    default=0.75)
 args = parser.parse_args()
 
 # Altere essa variável para utilizar outros videos ou câmeras
@@ -24,7 +32,7 @@ start_x, start_y, end_x, end_y = (args.roi[i] for i in range(4))
 # Altere essas variáveis para utilizar outros modelos pré-treinados do YOLO
 model_cfg = "yolov3.cfg"
 model_weights = "yolov2.weights"
-scale = args.scale
+scale = 320
 
 # Altere esse variável para alterar a tolerância de confiabilidade do resultado
 # Define o quão confiável um resultado deve ser para não ser descartado
@@ -38,11 +46,13 @@ global cars_counter
 cars_counter = 0
 global bikes_counter
 bikes_counter = 0
+global persons_counter
+persons_counter = 0
 
 global already_counted
 already_counted = False
 
-cap = cv2.VideoCapture("cars.mp4")
+cap = cv2.VideoCapture("334.mp4")
 
 classes_file = 'coco.names'
 class_names = []
@@ -54,8 +64,7 @@ net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 
-# Função para encontrar objetos na imagem
-def find_objects(outputs, img):
+def find_objects2(outputs, img, object_name, save, carro):
     # Lê o formato da imagem
     height, width = img.shape[0], img.shape[1]
 
@@ -84,6 +93,7 @@ def find_objects(outputs, img):
                            ), int((detection[1] * height) - (h / 2))
                 # Adiciona nas listas
                 bounding_boxes.append([x, y, w, h])
+
                 class_ids.append(class_id)
                 confidence_values.append(float(confidence))
 
@@ -95,80 +105,91 @@ def find_objects(outputs, img):
         globals()['already_counted'] = False
 
     for i in indices:
-        i = i-1
+        i = i - 1
         box = bounding_boxes[i]
-
         x, y, w, h = (box[i] for i in range(4))
+        if class_names[class_ids[i]] == object_name:
+            chopped_object = img[y:y + h, x:x + w]
 
-        if not globals()['already_counted']:
-            if class_names[class_ids[i]] == 'car':
-                globals()['cars_counter'] += 1
-                globals()['already_counted'] = True
-            elif class_names[class_ids[i]] == 'motorbike':
-                globals()['bikes_counter'] += 1
-                globals()['already_counted'] = True
+            if len(chopped_object) > 0:
+                if save:
+                    x1, x2, y1, y2 = carro
+                    if x >= x1 and (x+w) <= x2 and y >= y1 and (y+h) <= y2:
+                        cv2.imwrite("Pessoas/h" + str(y) + "r" + str(random.randint(0, 100)) + '.jpg', chopped_object)
+                        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                        cv2.putText(img, "Com Cinto", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (36, 255, 12), 2)
+                    else:
+                        print('-----------------------')
+                        print('pessoa fora do carro: ')
+                        print(str(x)+'<='+ str(x1)+' ou ' + str(x+w)+'>='+ str(x2))
+                        print('ou')
+                        print(str(y)+'<='+ str(y1)+' ou ' + str(y+h)+'>='+ str(y2))
+                        print('-----------------------')
+                else:
+                    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    corte = x, x + w, y, y + h
+                    return corte
 
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
 
-layer_names = net.getLayerNames()
-out_indices = net.getUnconnectedOutLayers()
 
-output_names = [layer_names[i-1] for i in out_indices]
-result = cv2.VideoWriter('result.avi', cv2.VideoWriter_fourcc(*'XVID'), 30.0, (1280, 720))
+def main():
+    layer_names = net.getLayerNames()
+    out_indices = net.getUnconnectedOutLayers()
 
-while True:
-    # Lê a imagem
-    success, img = cap.read()
-    tempo = float(1 / 50)
-    sleep(tempo)
+    output_names = [layer_names[i - 1] for i in out_indices]
+    result = cv2.VideoWriter('result.avi', cv2.VideoWriter_fourcc(*'XVID'), 30.0, (1280, 720))
 
-    if success:
-        tempo = float(1 / 999)
+    while True:
+        # Lê a imagem
+        success, img = cap.read()
+        tempo = float(1 / 50)
         sleep(tempo)
-        # Recorta a área de interesse
-        cropped = img[start_y:end_y, start_x:end_x]
 
-        # Desenha um retângulo na área de interesse
-        cv2.rectangle(img, (start_x, start_y),
-                      (end_x, end_y), (255, 255, 255), 2)
+        if success:
+            tempo = float(1 / 999)
+            sleep(tempo)
+            # Recorta a área de interesse
+            cropped = img[start_y:end_y, start_x:end_x]
 
-        cv2.putText(img, "Carros: ", (25, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-        cv2.putText(img, str(cars_counter), (150, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+            # Desenha um retângulo na área de interesse
+            cv2.rectangle(img, (start_x, start_y),
+                          (end_x, end_y), (255, 255, 255), 2)
 
-        cv2.putText(img, "Motos:", (25, 75),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-        cv2.putText(img, str(bikes_counter), (150, 75),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+            # Cria um Blob a partir da imagem
+            blob = cv2.dnn.blobFromImage(
+                cropped, 1 / 255, (scale, scale),
+                [0, 0, 0], 1,
+                crop=False
+            )
 
-        # Cria um Blob a partir da imagem
-        blob = cv2.dnn.blobFromImage(
-            cropped, 1/255, (scale, scale),
-            [0, 0, 0], 1,
-            crop=False
-        )
+            # Define o Blob como a entrada da Rede
+            net.setInput(blob)
 
-        # Define o Blob como a entrada da Rede
-        net.setInput(blob)
+            # Lê as camadas de saída
+            outputs = net.forward(output_names)
 
-        # Lê as camadas de saída
-        outputs = net.forward(output_names)
+            # Encontra os objetos na imagem
+            carrotroll = 0,0,0,0
+            carro = find_objects2(outputs, cropped, 'car', False, carrotroll)
+            if carro is not None:
+                find_objects2(outputs, cropped, 'person', True, carro)
 
-        # Encontra os objetos na imagem
-        find_objects(outputs, cropped)
+            # find_objects2(outputs, cropped, 'person', True)
 
-        # Mostra a imagem computada
-        cv2.imshow('Contador', img)
+            # Mostra a imagem computada
+            cv2.imshow('Contador', img)
 
-        result.write(img)
+            result.write(img)
 
-    if cv2.waitKey(1) == 27:
-        break
+        if cv2.waitKey(1) == 27:
+            break
 
-result.release()
-cap.release()
-cv2.destroyAllWindows()
+    result.release()
+    cap.release()
+    cv2.destroyAllWindows()
 
-print(cars_counter, " ", bikes_counter)
+    print(cars_counter, " ", bikes_counter)
+
+
+main()
