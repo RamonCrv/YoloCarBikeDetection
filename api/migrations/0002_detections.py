@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('usuarios', '0001_initial'),
+        ('api', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Deteccao',
+            name='detections',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('status_motorista', models.CharField(max_length=100)),

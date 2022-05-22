@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('usuarios', '0002_deteccao'),
+        ('api', '0002_detections'),
     ]
 
     operations = [
         migrations.AlterModelTable(
-            name='deteccao',
-            table='deteccao',
+            name='detections',
+            table='detections',
         ),
         migrations.AlterModelTable(
-            name='treinamento',
-            table='treinamento',
+            name='trains',
+            table='trains',
         ),
     ]

@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('usuarios', '0003_alter_deteccao_table_alter_treinamento_table'),
+        ('api', '0003_alter_deteccao_table_alter_treinamento_table'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deteccao',
+            model_name='detections',
             name='data_hora_deteccao',
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='treinamento',
+            model_name='trains',
             name='data_treinamento',
             field=models.DateTimeField(auto_now_add=True),
         ),
