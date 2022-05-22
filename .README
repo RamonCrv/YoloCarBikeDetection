@@ -1,0 +1,9 @@
+#BAiXAR YOLO na descrição do video
+https://www.youtube.com/watch?v=Sx_HioMUtiY
+
+Yolo V4 cfg
+Yolo V4 weights
+
+pip3 install opencv-python
+pip3 install keras
+pip3 install tensorflow
