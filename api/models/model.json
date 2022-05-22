@@ -1,0 +1,14 @@
+[
+    {
+        "video": "http://amersonchagas.com.br/video.mp4",
+        "Minuto": "1:50",
+        "Violencia": "True",
+        "Genero": ["90¨% Mulher", "10% Homem"]
+    },
+     {
+        "video": "http://amersonchagas.com.br/video.mp4",
+        "Minuto": "2:50",
+        "Violencia": "True",
+        "Genero": ["80¨% Mulher", "20% Homem"]
+    }
+  ]

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- metas -->
+    <meta charset="utf-8">
+    <meta name="author" content="99pixel" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="keywords" content="Mombo - Creative Multi-Purpose Template" />
+    <meta name="description" content="Mombo - Creative Multi-Purpose Template" />
+    <!-- title -->
+    <title>Detecção de Uso de Cinto de Segurança</title>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico">
+    <!-- CSS Template -->
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Skippy -->
+    <a id="skippy" class="sr-only sr-only-focusable u-skippy" href="#content">
+        <div class="container">
+            <span class="u-skiplink-text">Skip to main content</span>
+        </div>
+    </a>
+    <!-- End Skippy -->
+    <!-- Preload -->
+    <div id="loading" class="preloader">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- End Preload -->
+    <div class="header-height"></div>
+    <!-- Header -->
+    <header class="header-main header-light fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <!-- Logo -->
+                <a class="navbar-brand" href="index.html">
+                    <img src="static/img/logo.png" width="110px" title="" alt="">
+                </a>
+                <!-- Logo -->
+                <!-- Mobile Toggle -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <!-- End Mobile Toggle -->
+                <!-- Menu -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="#feature" class="nav-link">Recursos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#api" class="nav-link">API</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- End Menu -->
+            </div>
+        </nav>
+    </header>
+    <!-- Header End -->
+    <!-- Main -->
+    <main>
+        <!-- Home Banner -->
+
+        <section class="pb-4 analyze">
+            <div class="container">
+                <div class="row justify-content-center pt-15 min-vh-100">
+                    <div class="col-lg-9 col-xl-7 text-center pt-6">
+                        <h1 class="display-4 mb-3">Analise seu vídeo agora!</h1>
+                        <p class="lead">Selecione seu video e verifique o uso do cinto de segurança.</p>
+                        <form method='post' id='analyze' enctype="multipart/form-data" class="d-flex flex-row mb-2 p-1 input-group" >
+                            <input required id="video" name='video' type="file" class="form-control form-control-lg rounded-0 border-0" placeholder="Select a video..." style="border: solid #dee2e6 !important;">
+                            <button id="uploadButton" type='submit' class="btn btn-secondary rounded-0 flex-shrink-0"><icon class="fas fa-search"/></button>
+
+                            <div class="col-md-12">
+                                <label for="html">&nbsp;Tipo de Detecção:</label>&nbsp;&nbsp;
+                                <!-- <input type="radio" id="type_detection" name="type_detection" checked="" value="all"><label for="html">&nbsp;Violence + Gender</label>&nbsp;&nbsp;&nbsp;&nbsp; -->
+                                <input type="radio" id="type_detection" name="type_detection" value="belt"><label for="html">&nbsp;Cinto de Segurança</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <!-- <input type="radio" id="type_detection" name="type_detection" value="gender"><label for="html">&nbsp;Gender only</label> -->
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+
+
+        <section class="pb-4 result" style='display:none'>
+            <div class="container position-relative">
+                <div class="row min-vh-100 align-items-center py-5">
+                    <h1>Resultado...</h1>
+                    <div id="video_analyze" class="col-lg-6 py-10">
+                        <video width="100%" id="video_player" class="max-width-120" controls>
+                            <source src='' type=''>
+                        </video>
+                    </div>
+                    <div class="col-lg-6 col-xl-5 py-8 mr-auto">
+                        <div class="display-6 mb-3"></div>
+                        <div class='display-6 duration'></div>
+                        <div class='display-6  has_violence'></div>
+                        <div class='display-6 has_woman'></div>
+                        <div class="pt-3 text-right" style="margin-top: 10em">
+                             <a href="index.html">Analisar outro vídeo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End Home Banner -->
+        <!-- Section -->
+        <section class="section bg-gray-100 result" style='display:none'>
+            <div class="container">
+                <h1>Cenas Encontradas</h1>
+                <div class="row align-items-center justify-content-between" style="margin-top: 3em">
+                    <div class="tab-style-3 mt-3">
+                        <div id="timeline_scene" class="row">                         
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+
+
+        <!-- End Home Banner -->
+        <!-- Section -->
+        <section class="section bg-gray-100" id="feature">
+            <div class="container">
+                <h2>Recursos</h2>
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-lg-6 my-3">
+                        <img src="static/img/no-belt.png" title="" alt="">
+                    </div>
+                    <div class="col-lg-5 my-3 pr-xl-12">
+                        <h3 class="h2 mb-3">Deteção do uso do cinto de segurança</h3>
+                        <ul class="list-type-02 theme">
+                            <li><i class="fas fa-check"></i>Analisa um grupo de quadros por segundo</li>
+                            <li><i class="fas fa-check"></i>Envie o quadro selecionado para detecção do uso do cinto</li>
+                            <li><i class="fas fa-check"></i>Expõe quadros com usuarios sem cinto de segurança</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End Section -->
+         <!-- Section -->
+        <section class="section">
+            <div class="container">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-lg-5 my-3 pr-xl-12">
+                        <h3 class="h2 mb-3">Detecção do Uso do Cinto de Segurança</h3>
+                        <ul class="list-type-02 theme">
+                            <li><i class="fas fa-check"></i>Procurando o uso de cinto de segurança em cada quadro que há um veículo</li>
+                            <li><i class="fas fa-check"></i>Detecção do Motorista e do Passageiro</li>
+                            <li><i class="fas fa-check"></i>Dataset Treinado com mais de 1000 imagens</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 my-3">
+                        <img src="static/img/belt.png" title="" alt="">
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End Section -->
+         <!-- Section -->
+        <section class="section bg-gray-100" id="api">
+            <div class="container">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-lg-6 my-3">
+                        <img src="static/img/api.png" title="" alt="">
+                    </div>
+                    <div class="col-lg-5 my-3 pr-xl-12">
+                        <h3 class="h2 mb-3">API</h3>
+                        <ul class="list-type-02 theme">
+                            <li><i class="fas fa-check"></i>RESTful</li>
+                            <li><i class="fas fa-check"></i>Grátis</li>
+                            <li><i class="fas fa-check"></i>Tamanho Máximo do Vídeo: 50MB</li>
+                            <li><i class="fas fa-check"></i>Apenas Extensão <span class="badge bg-secondary">.avi</span> </li>
+                            <li><i class="fas fa-check"></i>URL: http://seudominio.com/analyze/</li>
+                            <li><i class="fas fa-check"></i>Enviar solicitação via método POST com o vídeo para o corpo com o nome 'vídeo'</li>
+                            <li><i class="fas fa-check"></i>E.g.:<code>
+{
+    "driver_detected": true,
+    "driver_has_belt": true,
+    "passenger_detected": true,
+    "passenger_has_belt": false,
+    "fps": 30,
+    "frame_count": 140,
+    "duration": 4.67,
+    "no_belt_seconds": [1.1, 1.8],
+    "processing_time": 28.555,
+    "url_frames": [
+        "https://ekma.s3-us-west-1.amazonaws.com/36b98d44-c3e7-11eb-83b0-0242ac120002.jpg",
+        "https://ekma.s3-us-west-1.amazonaws.com/36b98d44-c3e7-11eb-83b0-0242ac120002.jpg"
+    ]
+}
+</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End Section -->
+        
+    </main>
+    <!-- End Main -->
+    <!-- Footer-->
+    <footer class="footer effect-section">
+        <div class="footer-top">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4 col-sm-6 my-3">
+                        <h6 class="">
+                            <a href="#feature">Recursos</a>
+                        </h6>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 my-3">
+                        <div class="text-center">
+                            <img src="static/img/logo.png" width="110px" title="" alt="">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 my-3">
+                        <h6 class="text-right">
+                            <a href="#api">API</a>
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom footer-border-light position-relative">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12" style="margin-bottom: 15px">
+                        <div class="nav justify-content-center">
+                            <!--<a href="#" class="icon icon-sm icon-light mr-2 rounded-circle"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="icon icon-sm icon-light mr-2 rounded-circle"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="icon icon-sm icon-light mr-2 rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="icon icon-sm icon-light mr-2 rounded-circle"><i class="fab fa-instagram"></i></a>-->
+                        </div>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <p class="m-0 small">© 2021 copyright all right reserved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer -->
+    <!-- jquery -->
+    <script src="static/js/jquery-3.5.1.min.js"></script>
+    <!-- appear -->
+    <script src="static/vendor/appear/jquery.appear.js"></script>
+    <!--bootstrap-->
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- countTo -->
+    <script src="static/vendor/counter/jquery.countTo.js"></script>
+    <!-- typed -->
+    <script src="static/vendor/typed/typed.js"></script>
+    <!-- owl-carousel -->
+    <script src="static/vendor/owl-carousel/js/owl.carousel.min.js"></script>
+    <!-- magnific -->
+    <script src="static/vendor/magnific/jquery.magnific-popup.min.js"></script>
+    <!-- isotope -->
+    <script src="static/vendor/isotope/isotope.pkgd.min.js"></script>
+    <!-- jarallax -->
+    <script src="static/vendor/jarallax/jarallax-all.js"></script>
+    <!-- easy-pie-chart -->
+    <script src="static/vendor/easy-pie-chart/jquery.easypiechart.min.js"></script>
+    <!-- Theme Js -->
+    <script src="static/js/custom.js"></script>
+
+    
+    <script src="static/js/jquery.blockUI.js"></script>
+    <script src="static/js/validacao-upload.js"></script>
+    
+    <script src="static/js/send.js"></script>
+</body>
+<!-- end body -->
+
+</html>
