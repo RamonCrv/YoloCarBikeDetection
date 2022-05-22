@@ -17,7 +17,8 @@ from keras.applications.vgg16 import VGG16
 from keras.models import load_model
 from collections import deque
 
-model = load_model("Cinto.model")
+model = load_model("models/cinto.model")
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
 # (450, 900, 650, 1000)
@@ -28,9 +29,9 @@ parser.add_argument('-v', '--video_source', dest='video_source',
 parser.add_argument('-r', '--region_of_interest', dest='roi',
                     help="Região de interesse (start_x, start_y, end_x, end_y,)", default=(300, 300, 1600, 1000))
 parser.add_argument('-cfg', '--model_cfg', dest='cfg', help="Arquivo de configuração da rede YOLOv3",
-                    default="yolov3.cfg")
+                    default="yolo/yolov4.cfg")
 parser.add_argument('-w', '--model_weights', dest='weights', help="Arquivo de pesos da rede YOLOv3",
-                    default="yolov3.weights")
+                    default="yolo/yolov4.weights")
 parser.add_argument('-s', '--scale', dest='scale', help="Escala da rede", default=320)
 parser.add_argument('-ct', '--confidence_threshold', dest='ct', help="Tolerância de confiabilidade das detecções",
                     default=0.005)
@@ -62,7 +63,7 @@ persons_counter = 0
 global already_counted
 already_counted = False
 
-cap = cv2.VideoCapture("unifap.MOV")
+cap = cv2.VideoCapture("input/unifap.MOV")
 
 classes_file = 'coco.names'
 class_names = []
@@ -70,13 +71,11 @@ with open(classes_file, 'rt') as f:
     class_names = f.read().rstrip('\n').split('\n')
 
 #net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg ")
-net = cv2.dnn.readNet("yolov4.weights", "yolov4.cfg ")
+net = cv2.dnn.readNet("yolo/yolov4.weights", "yolo/yolov4.cfg ")
 #net = torch.hub.load('ultralytics/yolov5', 'yolov5l')
 #net = cv2.dnn.readNet("yolov3-spp.weights", "yolov3-spp.cfg ")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
 #net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
-
-
 
 def find_objects2(outputs, img, object_name, object_name2, save, carro):
     # Lê o formato da imagem
@@ -220,17 +219,17 @@ def main():
     out_indices = net.getUnconnectedOutLayers()
 
     output_names = [layer_names[i - 1] for i in out_indices]
-    result = cv2.VideoWriter('result.avi', cv2.VideoWriter_fourcc(*'XVID'), 30.0, (1280, 720))
+    result = cv2.VideoWriter('output/result.avi', cv2.VideoWriter_fourcc(*'XVID'), 100.0, (400, 300))
 
     while True:
         # Lê a imagem
         success, img = cap.read()
-        tempo = float(1 / 50)
+        tempo = float(1/1000)
         sleep(tempo)
 
         if success:
-            tempo = float(1 / 999)
-            sleep(tempo)
+            tempo = float(1/1000)
+            # sleep(tempo)
             # Recorta a área de interesse
             cropped = img[start_y:end_y, start_x:end_x]
             #cropped = img
@@ -270,7 +269,7 @@ def main():
 
     result.release()
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
     print(cars_counter, " ", bikes_counter)
 
@@ -282,7 +281,6 @@ def SimulatorImagem():
         print(" %.2f sem cinto " % (100 * score0))
     else:
         print(" %.2f com cinto " % (100 * score0))
-
 
     bodyImage2 = cv2.imread('teste3sc.PNG')
     score0 = classification(bodyImage2)
