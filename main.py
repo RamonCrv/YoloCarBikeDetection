@@ -1,37 +1,47 @@
 #!/usr/bin/env python3
 import random
-
 from cv2 import cv2
 import numpy as np
 from time import sleep
 import argparse
+import os
+
+
+#Classificatio library
+from keras.models import load_model
+#from keras.preprocessing.image import load_img
+#from keras.preprocessing.image import img_to_array
+from keras.applications.vgg16 import preprocess_input
+from keras.applications.vgg16 import decode_predictions
+from keras.applications.vgg16 import VGG16
+from keras.models import load_model
+from collections import deque
+
+model = load_model("Cinto.model")
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
 # (450, 900, 650, 1000)
+# (850, 300, 1350, 800)
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--video_source', dest='video_source',
                     help="Arquivo de origem do vídeo ou índice da câmera alvo", default="video.mp4")
 parser.add_argument('-r', '--region_of_interest', dest='roi',
-                    help="Região de interesse (start_x, start_y, end_x, end_y,)", default=(150, 300, 1500, 800))
+                    help="Região de interesse (start_x, start_y, end_x, end_y,)", default=(300, 300, 1600, 1000))
 parser.add_argument('-cfg', '--model_cfg', dest='cfg', help="Arquivo de configuração da rede YOLOv3",
                     default="yolov3.cfg")
 parser.add_argument('-w', '--model_weights', dest='weights', help="Arquivo de pesos da rede YOLOv3",
                     default="yolov3.weights")
 parser.add_argument('-s', '--scale', dest='scale', help="Escala da rede", default=320)
 parser.add_argument('-ct', '--confidence_threshold', dest='ct', help="Tolerância de confiabilidade das detecções",
-                    default=.05)
+                    default=0.005)
 parser.add_argument('-nms', '--nms_threshold', dest='nms', help="Tolerância de caixas limitantes sobrepostas",
-                    default=0.75)
+                    default=0.04)
 args = parser.parse_args()
 
-# Altere essa variável para utilizar outros videos ou câmeras
-video_source = args.video_source
 
 # Altere essas variáveis para definir área de interesse
 start_x, start_y, end_x, end_y = (args.roi[i] for i in range(4))
 
-# Altere essas variáveis para utilizar outros modelos pré-treinados do YOLO
-model_cfg = "yolov3.cfg"
-model_weights = "yolov2.weights"
 scale = 320
 
 # Altere esse variável para alterar a tolerância de confiabilidade do resultado
@@ -52,19 +62,23 @@ persons_counter = 0
 global already_counted
 already_counted = False
 
-cap = cv2.VideoCapture("334.mp4")
+cap = cv2.VideoCapture("unifap.MOV")
 
 classes_file = 'coco.names'
 class_names = []
 with open(classes_file, 'rt') as f:
     class_names = f.read().rstrip('\n').split('\n')
 
-net = cv2.dnn.readNet("yolov3-spp.weights", "yolov3-spp.cfg ")
+#net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg ")
+net = cv2.dnn.readNet("yolov4.weights", "yolov4.cfg ")
+#net = torch.hub.load('ultralytics/yolov5', 'yolov5l')
+#net = cv2.dnn.readNet("yolov3-spp.weights", "yolov3-spp.cfg ")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+#net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 
-def find_objects2(outputs, img, object_name, save, carro):
+
+def find_objects2(outputs, img, object_name, object_name2, save, carro):
     # Lê o formato da imagem
     height, width = img.shape[0], img.shape[1]
 
@@ -108,16 +122,60 @@ def find_objects2(outputs, img, object_name, save, carro):
         i = i - 1
         box = bounding_boxes[i]
         x, y, w, h = (box[i] for i in range(4))
-        if class_names[class_ids[i]] == object_name:
+
+        if class_names[class_ids[i]] == object_name or class_names[class_ids[i]] == object_name2:
             chopped_object = img[y:y + h, x:x + w]
 
             if len(chopped_object) > 0:
                 if save:
-                    x1, x2, y1, y2 = carro
+                    x1, x2, y1, y2, wc = carro
                     if x >= x1 and (x+w) <= x2 and y >= y1 and (y+h) <= y2:
-                        cv2.imwrite("Pessoas/h" + str(y) + "r" + str(random.randint(0, 100)) + '.jpg', chopped_object)
+                        #print("Altura: " + str(x2) + ", Largura: " + str(y2))
+
+
+                        chopped_object_resized = cv2.resize(chopped_object, (128, 128))
+                        score0 = classification(chopped_object_resized)
+
+                        #if score0 * 100 > 50:
+                            #print(" %.2f sem cinto " % (100 * score0))
+                        #else:
+                            #print(" %.2f com cinto " % (100 * score0))
+
+
                         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                        cv2.putText(img, "Com Cinto", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (36, 255, 12), 2)
+
+                        if score0*100 <50:
+                            if x+(w/2) < x1+wc/2:
+                                print("Posição carro: "+str(x1+wc/2)+"; Posição pessoa: "+str(x)+". R: Passageiro com Cinto ")
+                                cv2.putText(img, "Passageiro Com Cinto", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (36, 255, 12),
+                                            2)
+
+                                cv2.imwrite("Pessoas/PCCh" + str(y) + "r" + str(random.randint(0, 100)) + '.png',
+                                            chopped_object_resized)
+                            else:
+                                print("Posição carro: " + str(x1+wc/2) + "; Posição pessoa: " + str(x)+". R: Motorista com Cinto ")
+                                cv2.putText(img, "Motorista Com Cinto", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+                                            (36, 255, 12),
+                                            2)
+
+                                cv2.imwrite("Pessoas/MCCh" + str(y) + "r" + str(random.randint(0, 100)) + '.png',
+                                            chopped_object_resized)
+
+                        else:
+                            if x+(w/2) < x1+wc/2:
+                                print("Posição carro: " + str(x1+wc/2) + "; Posição pessoa: " + str(x)+". R: Passageiro Sem Cinto ")
+                                cv2.putText(img, "Passageiro Sem Cinto ", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (36, 255, 12), 2)
+                                cv2.imwrite("Pessoas/PSCh" + str(y) + "r" + str(random.randint(0, 100)) + '.png',
+                                            chopped_object_resized)
+                            else:
+                                print("Posição carro: " + str(x1+wc/2) + "; Posição pessoa: " + str(x)+". R: Motorista Sem Cinto ")
+                                cv2.putText(img, "Motorista Sem Cinto ", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+                                            (36, 255, 12), 2)
+                                cv2.imwrite("Pessoas/MSCh" + str(y) + "r" + str(random.randint(0, 100)) + '.png',
+                                            chopped_object_resized)
+
+
+
                     else:
                         print('-----------------------')
                         print('pessoa fora do carro: ')
@@ -127,10 +185,34 @@ def find_objects2(outputs, img, object_name, save, carro):
                         print('-----------------------')
                 else:
                     cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                    corte = x, x + w, y, y + h
+                    corte = x, x + w, y, y + h, w
                     return corte
 
 
+def classification(image):
+    var_size = 128
+
+    #frame = np.copy(image)
+
+    #mean = np.array([123.68, 116.779, 103.939][::1], dtype="float32")
+    #Q = deque(maxlen=var_size)
+
+    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    #frame = cv2.resize(frame, (128, 128)).astype("float32")
+    #frame -= mean
+
+    #frame = np.expand_dims(frame, 0)  # Create batch axis
+
+    frame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.resize(frame, (128, 128)).astype("float32")
+    frame = np.expand_dims(frame, 0)  # Create batch axis
+    preds = model.predict(frame)
+    score = preds[0]
+
+    return score[0]
+    #return " %.2f CC | %.2f SC" % (100 * score[0], 100 * score[1])
 
 
 def main():
@@ -151,7 +233,7 @@ def main():
             sleep(tempo)
             # Recorta a área de interesse
             cropped = img[start_y:end_y, start_x:end_x]
-
+            #cropped = img
             # Desenha um retângulo na área de interesse
             cv2.rectangle(img, (start_x, start_y),
                           (end_x, end_y), (255, 255, 255), 2)
@@ -171,9 +253,10 @@ def main():
 
             # Encontra os objetos na imagem
             carrotroll = 0,0,0,0
-            carro = find_objects2(outputs, cropped, 'car', False, carrotroll)
+            carro = find_objects2(outputs, cropped, 'car', 'truck', False, carrotroll)
+            imgPessoa = outputs
             if carro is not None:
-                find_objects2(outputs, cropped, 'person', True, carro)
+                imgPessoa = find_objects2(outputs, cropped, 'person', 'dasdsa', True, carro)
 
             # find_objects2(outputs, cropped, 'person', True)
 
@@ -192,4 +275,22 @@ def main():
     print(cars_counter, " ", bikes_counter)
 
 
+def SimulatorImagem():
+    bodyImage = cv2.imread('teste4cc.PNG')
+    score0 = classification(bodyImage)
+    if score0*100 > 40:
+        print(" %.2f sem cinto " % (100 * score0))
+    else:
+        print(" %.2f com cinto " % (100 * score0))
+
+
+    bodyImage2 = cv2.imread('teste3sc.PNG')
+    score0 = classification(bodyImage2)
+    #if score0 * 100 > 40:
+      #  print(" %.2f sem cinto " % (100 * score0))
+    #else:
+     #   print(" %.2f com cinto " % (100 * score0))
+
+
 main()
+#SimulatorImagem()
