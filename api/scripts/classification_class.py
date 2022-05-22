@@ -16,11 +16,11 @@ import logging
 
 class Classification():
   def __init__(self ):
-    self.server = "http:127.0.0.1:8000"
+    self.server = "http://127.0.0.1:8000"
     self.export_frames = False
     self.export_video = True
     self.acuracy=0.9
-    self.detect_belt = False
+    self.detect_belt = True
     self.driver_detected = False
     self.unbelted_driver = False
     self.passenger_detected = False
@@ -37,11 +37,13 @@ class Classification():
       self.detect_belt = True
 
     vs = cv2.VideoCapture(filename)
-
+    
     fps = vs.get(cv2.CAP_PROP_FPS)
     frame_count = int(vs.get(cv2.CAP_PROP_FRAME_COUNT))
     duration = frame_count/fps
 
+
+    print('sending video to detection...')
     unbelted_seconds, ary_images,ary_names, url_video = self.detectation_from_video(vs, frame_count, fps)
     
     millis2 = time.time()
@@ -64,13 +66,14 @@ class Classification():
     }
     return retorno
 
-
-
   def detectation_from_video(self, vs, frame_count, fps):
     # video info
     video_format = '.avi'
-    video_id = str(uuid.uuid1()) + video_format
-    output_video = "inputs\videos/" + video_id
+    video_id = str(uuid.uuid1()) + video_format    
+
+    output_video = "static/inputs/" + video_id
+    print("Analisando Video: "+output_video)
+
     writer = None
 
     unbelted_seconds = []
@@ -84,6 +87,9 @@ class Classification():
     export_video_frame = False
     
     while frame_seq < frame_count:
+
+      print("Frame: "+str(frame_seq))
+
       vs.set(cv2.CAP_PROP_POS_FRAMES,frame_seq)
 
       # read the next frame from the file
@@ -106,26 +112,43 @@ class Classification():
 
         # call belt detection
         if self.detect_belt == True:
-          if(self.carDetection.detectCar(frame) == True):
 
-            if(self.beltDetection.detectUnbeltedDriver(frame) == True):
-              self.unbelted_driver = True
-              unbelted_seconds.append(frame_seq / fps)
-              ary_names.append('driver')
-
-            if(self.beltDetection.detectUnbeltedPassenger(frame) == True):
-              self.unbelted_passenger = True
-              unbelted_seconds.append(frame_seq / fps)
-              ary_names.append('passenger')
+          print("Procurando Carro")
+          if(self.carDetection.detectCar(frame) == True):            
+            print("Carro Encontrado")
+            
+            print("Procurando Motorista")            
+            if(self.carDetection.detectDriver(frame) == True):              
+              self.driver_detected = True
+              print("Motorista Encontrado")
+            
+              print("Verificando Cinto")
+              if(self.beltDetection.detectUnbeltedDriver(frame) == True):
+                self.unbelted_driver = True
+                unbelted_seconds.append(frame_seq / fps)
+                ary_names.append('driver')                
+                print("Motorista Sem Cinto")
+            
+            print("Procurando Passageiro") 
+            if(self.carDetection.detectPassenger(frame) == True):            
+              self.passenger_detected = True
+            
+              print("Verificando Cinto")
+              if(self.beltDetection.detectUnbeltedPassenger(frame) == True):
+                self.unbelted_passenger = True
+                unbelted_seconds.append(frame_seq / fps)
+                ary_names.append('passenger')          
+                print("Passageiro Sem Cinto")
 
             # write the frame
-            image_path = 'inputs/frames/' + str(frame_seq) + '.jpg'
+            image_path = 'static/outputs/frames/frame_'+str(frame_seq) + '.jpg'
             cv2.imwrite(image_path, frame)
             
             # upload file to S3
             image_id = str(uuid.uuid1()) + '.jpg'
 
-            ##ADICIONAR O COMANDO PRA SALVAR A IMAGEM NO SERVIDOR
+            # SALVANDO O CORTE DO CARRO E
+            cv2.imwrite("static/outputs/frames/car_" + image_id, frame)
 
             if export_video_frame == False:
               export_video_frame = True
@@ -158,10 +181,9 @@ class Classification():
         
       # remove file
       #os.remove(output_video)
-
     
     cv2.destroyAllWindows()
 
-    url_video = self.server+'/output/' + video_id
+    url_video = self.server+'/static/inputs/' + video_id
 
     return unbelted_seconds, ary_images, ary_names, url_video

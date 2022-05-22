@@ -61,8 +61,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
-
-
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TEMPLATES = [
@@ -130,27 +128,22 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-APPEND_SLASH = False
 
+APPEND_SLASH = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL  = '/static/'
-MEDIA_URL   = 'img/'
+STATIC_URL = '/static/'
+MEDIA_URL   = '/media/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/img')
 
-LOGIN_REDIRECT_URL  = '/index'
-LOGOUT_REDIRECT_URL = '/login'
+MEDIA_ROOT = os.path.join('/media')
 
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

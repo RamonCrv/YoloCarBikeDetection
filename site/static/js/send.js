@@ -26,8 +26,7 @@ $(document).ready(function(){
             },
             success: function(response) {              
 
-                $.unblockUI(); //Desbloquear UI
-                
+                $.unblockUI(); //Desbloquear UI              
                 
 
                 if(response.duration == undefined){
@@ -42,24 +41,32 @@ $(document).ready(function(){
                     $('.result').slideDown(1000);
                     $('.duration').append('Video Duration: '+response.duration);
 
-                    if (type_det !== 'gender') {
-                        if(response.has_violence){
-                            $('.has_violence').append("Violence was detected!");
+                    if (type_det == 'belt') {
+                        if(response.driver_detected){
+                            if(response.unbelted_driver){
+                                $('.unbelted_driver').append("Motorista sem Cinto foi Detectado no Video!"); 
+                            }else{                                
+                                
+                                $('.unbelted_driver').append("Nenhum Motorista sem Cinto foi Localizado!");
+                            }
                         } else{
-                            $('.has_violence').append("Violence was not detected!");
+                            $('.unbelted_driver').append("Nenhum Motorista Detectado no Video!");
                         }
+
+                        if(response.passenger_detected){
+                            if(response.unbelted_passenger){                                                             
+                                $('.unbelted_passenger').append("Passageiro sem Cinto foi Detectado no Video!");
+                            }else{ 
+                                $('.unbelted_passenger').append("Nenhum Passageiro sem Cinto foi Localizado!");  
+                            }
+                        } else{
+                            $('.unbelted_passenger').append("Nenhum Passageiro Detectado no Video!");
+                        }
+
                     }
                     
-                    if (type_det !== 'violence') {
-                        if(response.has_woman){
-                            $('.has_woman').append("Women were detected!");
-                        }else {
-                            $('.has_woman').append("Women were not detected!");                  
-                        }
-                    }
-
                     $.each(response.url_frames, function(index, item) {
-                        $("#timeline_scene").append("<div class='col-lg-3 text-center'><img src='"+item+"' />"+response.violence_seconds[index]+"s</div>");
+                        $("#timeline_scene").append("<div class='col-lg-3 text-center'><img src='"+item+"' />"+response.unbelted_seconds[index]+"s [ "+response.unbelted_name[index]+" ]</div>");
                     });
                     
                 }
