@@ -12,7 +12,7 @@ $(document).ready(function(){
         formData.append('type_detection', type_det);
         formData.append('video', video);
 
-        $.blockUI({ message: "<h1>Analyzing...<br/>don't reload a page</h1>"});
+        $.blockUI({ message: "<h1>Analisando...<br/>Não recarregue esta página</h1>"});
 
           $.ajax({
             url: 'http://127.0.0.1:8000/analyze/',
@@ -39,7 +39,7 @@ $(document).ready(function(){
                 
                     $('.analyze').slideUp(1000);
                     $('.result').slideDown(1000);
-                    $('.duration').append('Video Duration: '+response.duration);
+                    $('.duration').append('Duração do Video : '+response.duration);
 
                     if (type_det == 'belt') {
                         if(response.driver_detected){

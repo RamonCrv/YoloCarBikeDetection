@@ -1,0 +1,5 @@
+api/models/belts.model
+api/yolo
+api/static/inputs/*
+api/static/outputs/videos/*
+api/static/outputs/frames/*

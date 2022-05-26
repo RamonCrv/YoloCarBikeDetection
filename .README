@@ -1,0 +1,26 @@
+#BAiXAR YOLO na descrição do video
+https://www.youtube.com/watch?v=Sx_HioMUtiY
+Yolo V4 cfg
+Yolo V4 weights
+
+
+#DEPENDENCIES 
+
+pip3 install opencv-python
+pip3 install keras
+pip3 install tensorflow
+pip3 install pandas
+pip3 install boto3
+
+pip3 install django
+pip3 install djangorestframework
+pip3 install django-cors-headers
+pip3 install django-widget-tweaks
+pip3 install django-crispy-forms
+pip3 install mysqlclient
+pip3 install cvlib
+
+#PARA STARTAR O SERVER
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py runserver

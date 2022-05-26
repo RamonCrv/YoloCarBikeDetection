@@ -27,7 +27,8 @@ class Classification():
     self.unbelted_passenger = False
   
     self.carDetection = CarDetection()
-    self.beltDetection = BeltDetection()
+    self.beltDetection = BeltDetection()   
+
   
   def analize(self, filename, type_detection):
     print('reading video...')
@@ -114,7 +115,37 @@ class Classification():
         if self.detect_belt == True:
 
           print("Procurando Carro")
-          if(self.carDetection.detectCar(frame) == True):            
+          cars = self.carDetection.detectCar(frame)
+          print(str(len(cars))+" Carros encontrados no frame: "+str(frame_seq / fps))
+          for car in cars:
+            print("Procurando motorista")
+            driverDetected, driverImg = self.carDetection.detectDriver(frame, car, frame_seq / fps)
+            if(driverDetected):              
+              self.driver_detected = True
+              print("Motorista Encontrado no tempo:"+str(frame_seq / fps))            
+              print("Verificando Cinto no Motorista")
+              if(self.beltDetection.detectUnbeltedDriver(driverImg) == True):
+                self.unbelted_driver = True
+                unbelted_seconds.append(frame_seq / fps)
+                ary_names.append('driver')                
+                print("Motorista Sem Cinto")  
+                             
+            print("Procurando Passageiro") 
+            passengerDetected, passengerImg = self.carDetection.detectPassenger(frame, car, frame_seq / fps)
+            if(passengerDetected):            
+              self.passenger_detected = True
+              print("Passageiro encontrado no tempo: "+str(frame_seq / fps))          
+              print("Verificando Cinto no passageiro")
+              if(self.beltDetection.detectUnbeltedPassenger(passengerImg) == True):
+                self.unbelted_passenger = True
+                unbelted_seconds.append(frame_seq / fps)
+                ary_names.append('passenger')          
+                print("Passageiro Sem Cinto")
+
+
+
+          if(self.carDetection.detectCar(frame) == True):
+
             print("Carro Encontrado")
             
             print("Procurando Motorista")            
