@@ -46,8 +46,7 @@ class CarDetection():
 
   def detectCar(self, frame):
     cars = self.detectObjects(frame, "car")
-    return cars
-    
+    return cars    
 
   def detectDriver(self, frame, car, seconds):    
     persons = self.detectObjects(frame, "person") 

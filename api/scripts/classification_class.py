@@ -31,7 +31,7 @@ class Classification():
 
   
   def analize(self, filename, type_detection):
-    print('reading video...')
+    print('Carregando o Vídeo...')
     millis = time.time()
 
     if type_detection == 'belt':
@@ -44,12 +44,12 @@ class Classification():
     duration = frame_count/fps
 
 
-    print('sending video to detection...')
+    print('Enviando o Vídeo para Detecção...')
     unbelted_seconds, ary_images,ary_names, url_video = self.detectation_from_video(vs, frame_count, fps)
     
     millis2 = time.time()
 
-    print('video result:')
+    print('Resultado do Vídeo:')
     
     retorno = { 
       'driver_detected': self.driver_detected,
@@ -87,9 +87,7 @@ class Classification():
 
     export_video_frame = False
     
-    while frame_seq < frame_count:
-
-      print("Frame: "+str(frame_seq))
+    while frame_seq < frame_count:      
 
       vs.set(cv2.CAP_PROP_POS_FRAMES,frame_seq)
 
@@ -110,82 +108,39 @@ class Classification():
 
       # analyze only 2 frames per second
       if frame_seq % frame_jump == 0:
+        print("Analisando Frame: "+str(frame_seq)+"\n")
 
         # call belt detection
         if self.detect_belt == True:
 
-          print("Procurando Carro")
+          print("Procurando Carro...\n")
           cars = self.carDetection.detectCar(frame)
-          print(str(len(cars))+" Carros encontrados no frame: "+str(frame_seq / fps))
-          for car in cars:
-            print("Procurando motorista")
-            driverDetected, driverImg = self.carDetection.detectDriver(frame, car, frame_seq / fps)
-            if(driverDetected):              
-              self.driver_detected = True
-              print("Motorista Encontrado no tempo:"+str(frame_seq / fps))            
-              print("Verificando Cinto no Motorista")
-              if(self.beltDetection.detectUnbeltedDriver(driverImg) == True):
-                self.unbelted_driver = True
-                unbelted_seconds.append(frame_seq / fps)
-                ary_names.append('driver')                
-                print("Motorista Sem Cinto")  
-                             
-            print("Procurando Passageiro") 
-            passengerDetected, passengerImg = self.carDetection.detectPassenger(frame, car, frame_seq / fps)
-            if(passengerDetected):            
-              self.passenger_detected = True
-              print("Passageiro encontrado no tempo: "+str(frame_seq / fps))          
-              print("Verificando Cinto no passageiro")
-              if(self.beltDetection.detectUnbeltedPassenger(passengerImg) == True):
-                self.unbelted_passenger = True
-                unbelted_seconds.append(frame_seq / fps)
-                ary_names.append('passenger')          
-                print("Passageiro Sem Cinto")
-
-
-
-          if(self.carDetection.detectCar(frame) == True):
-
-            print("Carro Encontrado")
-            
-            print("Procurando Motorista")            
-            if(self.carDetection.detectDriver(frame) == True):              
-              self.driver_detected = True
-              print("Motorista Encontrado")
-            
-              print("Verificando Cinto")
-              if(self.beltDetection.detectUnbeltedDriver(frame) == True):
-                self.unbelted_driver = True
-                unbelted_seconds.append(frame_seq / fps)
-                ary_names.append('driver')                
-                print("Motorista Sem Cinto")
-            
-            print("Procurando Passageiro") 
-            if(self.carDetection.detectPassenger(frame) == True):            
-              self.passenger_detected = True
-            
-              print("Verificando Cinto")
-              if(self.beltDetection.detectUnbeltedPassenger(frame) == True):
-                self.unbelted_passenger = True
-                unbelted_seconds.append(frame_seq / fps)
-                ary_names.append('passenger')          
-                print("Passageiro Sem Cinto")
-
-            # write the frame
-            image_path = 'static/outputs/frames/frame_'+str(frame_seq) + '.jpg'
-            cv2.imwrite(image_path, frame)
-            
-            # upload file to S3
-            image_id = str(uuid.uuid1()) + '.jpg'
-
-            # SALVANDO O CORTE DO CARRO E
-            cv2.imwrite("static/outputs/frames/car_" + image_id, frame)
-
-            if export_video_frame == False:
-              export_video_frame = True
-            
-            # remove file
-            os.remove(image_path)
+          print("[["+str(len(cars))+" Carros encontrados no tempo: "+str(frame_seq / fps)+"]]\n")
+          
+          if(cars):
+            print("Procurando motorista e passageiro...\n")
+            for car in cars:
+              driverDetected, driverImg = self.carDetection.detectDriver(frame, car, frame_seq / fps)
+              if(driverDetected):              
+                self.driver_detected = True
+                print("[[Motorista Encontrado no tempo:"+str(frame_seq / fps)+"]]")            
+                print("Verificando Cinto no Motorista...")
+                if(self.beltDetection.detectUnbeltedDriver(driverImg) == True):
+                  self.unbelted_driver = True
+                  unbelted_seconds.append(frame_seq / fps)
+                  ary_names.append('driver')                
+                  print("[[Motorista Sem Cinto Encontrado no tempo:"+str(frame_seq / fps)+"]]\n")  
+                              
+              passengerDetected, passengerImg = self.carDetection.detectPassenger(frame, car, frame_seq / fps)
+              if(passengerDetected):            
+                self.passenger_detected = True
+                print("[[Passageiro encontrado no tempo: "+str(frame_seq / fps)+"]]")          
+                print("Verificando Cinto no passageiro...")
+                if(self.beltDetection.detectUnbeltedPassenger(passengerImg) == True):
+                  self.unbelted_passenger = True
+                  unbelted_seconds.append(frame_seq / fps)
+                  ary_names.append('passenger')   
+                  print("[[Passageiro Sem Cinto Encontrado no tempo:"+str(frame_seq / fps)+"]]\n")                 
 
       else: 
 

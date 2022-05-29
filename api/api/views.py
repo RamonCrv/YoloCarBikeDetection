@@ -16,30 +16,26 @@ from scripts.belt_detection_class import BeltDetection
 
 @api_view(["POST"])
 def analyze(request):
-
     try:
         request.FILES['video']
     except KeyError:
             json = "File called 'video' not found in Request!"
     else:
         video = request.FILES['video']
-        video_path = video.temporary_file_path()
-        
+        video_path = video.temporary_file_path()        
         extension =  os.path.splitext(video_path)[1]        
 
         if(extension == '.avi'):
             request.upload_handlers.pop(0)
-
             tamanho = int(Path(video_path).stat().st_size/1024) #em KB
-
             if(tamanho > 51200):
                 json = "This video reached the maximum size. 50MB maximum size!"
             else:
                 classification = Classification()
                 json = classification.analize(video_path, request.data.get('type_detection'))         
         else:
-            json = "This is not an allowed file type. Send a '.avi' video extension!"   
-       
+            json = "This is not an allowed file type. Send a '.avi' video extension!"  
+                   
     return JsonResponse(json, safe=False)
 
 
