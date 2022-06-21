@@ -25,10 +25,10 @@ def analyze(request):
         video_path = video.temporary_file_path()        
         extension =  os.path.splitext(video_path)[1]        
 
-        if(extension == '.avi'):
+        if(extension == '.mp4' or extension == '.avi' or extension == '.MOV'):
             request.upload_handlers.pop(0)
             tamanho = int(Path(video_path).stat().st_size/1024) #em KB
-            if(tamanho > 51200):
+            if(tamanho > 512000):
                 json = "This video reached the maximum size. 50MB maximum size!"
             else:
                 classification = Classification()

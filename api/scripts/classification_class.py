@@ -81,7 +81,7 @@ class Classification():
     frame_seq = 0
     size = 128
     frame_rate = 1
-    frame_jump = 30
+    frame_jump = 10
     ary_images = []
     ary_names = []
 

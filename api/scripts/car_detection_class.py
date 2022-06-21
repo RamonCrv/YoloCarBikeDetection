@@ -27,7 +27,7 @@ class CarDetection():
     with open("coco.names", "r") as f:
       self.class_names = [cname.strip() for cname in f.readlines()]
 
-    classes, scores, boxes = self.model.detect(frame, 0.1, 0.2)
+    classes, scores, boxes = self.model.detect(frame, 0.0000001, 0.8) #0.05, 0.04 default
 
     objectsDetected = []
     # PERCORRER TODAS AS DETECCÕES
