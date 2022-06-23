@@ -10,9 +10,9 @@ import requests
 import uuid
 import boto3
 
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
+# import cloudinary
+# import cloudinary.uploader
+# import cloudinary.api
 
 from scripts.car_detection_class import CarDetection
 from scripts.belt_detection_class import BeltDetection
