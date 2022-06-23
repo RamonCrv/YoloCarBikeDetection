@@ -9,6 +9,11 @@ import glob
 import requests
 import uuid
 import boto3
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 from scripts.car_detection_class import CarDetection
 from scripts.belt_detection_class import BeltDetection
 import imutils
@@ -69,7 +74,7 @@ class Classification():
 
   def detectation_from_video(self, vs, frame_count, fps):
     # video info
-    video_format = '.avi'
+    video_format = '.webm'
     video_id = str(uuid.uuid1()) + video_format    
 
     output_video = "static/inputs/" + video_id
@@ -77,15 +82,19 @@ class Classification():
 
     writer = None
 
-    unbelted_seconds = []
+    #config
     frame_seq = 0
     size = 128
     frame_rate = 1
-    frame_jump = 10
+    frame_jump = 12
+
+    #return
+    unbelted_seconds = []
     ary_images = []
     ary_names = []
 
     export_video_frame = False
+
     
     while frame_seq < frame_count:      
 
@@ -102,45 +111,83 @@ class Classification():
         break
 
       if writer is None:
-        fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-        writer = cv2.VideoWriter(output_video, fourcc, 30,
-          (W, H), True)
+        fourcc = cv2.VideoWriter_fourcc(*"vp80")
+        #writer = cv2.VideoWriter(output_video, fourcc, 30, (W, H), True)
+        writer = cv2.VideoWriter(output_video, fourcc, 30, (W, H))
 
       # analyze only 2 frames per second
       if frame_seq % frame_jump == 0:
-        print("Analisando Frame: "+str(frame_seq)+"\n")
+        print("\n\n[ETAPA] Analisando Frame: "+str(frame_seq)+"")
 
         # call belt detection
         if self.detect_belt == True:
 
-          print("Procurando Carro...\n")
+          print("[ETAPA] Procurando Carro no Frame....")
           cars = self.carDetection.detectCar(frame)
-          print("[["+str(len(cars))+" Carros encontrados no tempo: "+str(frame_seq / fps)+"]]\n")
-          
+          if len(cars) > 0 :
+            print("[RESULTADO] "+str(len(cars))+" Carro(s) encontrado(s) no tempo: "+str(frame_seq / fps)+".")
+          else:
+             print("[RESULTADO] Nenhum Carro Detectado.")
           if(cars):
-            print("Procurando motorista e passageiro...\n")
+            print("[ETAPA] Procurando Motorista e Passageiro...")
             for car in cars:
+              
+              uuid_detection = str(uuid.uuid1())
+
+              #PROCURANDO MOTORISTA
               driverDetected, driverImg = self.carDetection.detectDriver(frame, car, frame_seq / fps)
               if(driverDetected):              
                 self.driver_detected = True
-                print("[[Motorista Encontrado no tempo:"+str(frame_seq / fps)+"]]")            
-                print("Verificando Cinto no Motorista...")
+                print("[RESULTADO] Motorista Encontrado no tempo: "+str(frame_seq / fps)+"")            
+                print("[ETAPA] Verificando Cinto no Motorista...")
+                
                 if(self.beltDetection.detectUnbeltedDriver(driverImg) == True):
                   self.unbelted_driver = True
                   unbelted_seconds.append(frame_seq / fps)
                   ary_names.append('driver')                
-                  print("[[Motorista Sem Cinto Encontrado no tempo:"+str(frame_seq / fps)+"]]\n")  
-                              
+                  
+                  #salva a imagem
+                  img_path = "static/outputs/Persons/unbelted/driver_" + uuid_detection + ".png"
+                  cv2.imwrite(img_path, driverImg)             
+                  ary_images.append(self.server+"/"+img_path)             
+                  print("[RESULTADO] Motorista Sem Cinto Encontrado no tempo: "+str(frame_seq / fps)+".")
+                else:
+                  #salva a imagem
+                  img_path = "static/outputs/Persons/belted/driver_" + uuid_detection + ".png"
+                  cv2.imwrite(img_path, driverImg)             
+                  ary_images.append(self.server+"/"+img_path)  
+                  print("[RESULTADO] Motorista Com Cinto Encontrado no tempo: "+str(frame_seq / fps)+".")
+              
+              else:
+                 print("[RESULTADO] Motorista Não detectado.")       
+              
+              
+              #PROCURANDO PASSAGEIRO            
               passengerDetected, passengerImg = self.carDetection.detectPassenger(frame, car, frame_seq / fps)
               if(passengerDetected):            
                 self.passenger_detected = True
-                print("[[Passageiro encontrado no tempo: "+str(frame_seq / fps)+"]]")          
-                print("Verificando Cinto no passageiro...")
+                print("[RESULTADO] Passageiro encontrado no tempo: "+str(frame_seq / fps)+".")          
+                print("[ETAPA] Verificando Cinto no passageiro.")
+                
                 if(self.beltDetection.detectUnbeltedPassenger(passengerImg) == True):
                   self.unbelted_passenger = True
                   unbelted_seconds.append(frame_seq / fps)
-                  ary_names.append('passenger')   
-                  print("[[Passageiro Sem Cinto Encontrado no tempo:"+str(frame_seq / fps)+"]]\n")                 
+                  ary_names.append('passenger')    
+
+                  #salva a imagem
+                  img_path = "static/outputs/Persons/unbelted/passenger_" + uuid_detection + ".png"
+                  cv2.imwrite(img_path, passengerImg)             
+                  ary_images.append(self.server+"/"+img_path)  
+                  print("[RESULTADO] Passageiro Sem Cinto Encontrado no tempo:"+str(frame_seq / fps)+".")    
+                else:                  
+                  #salva a imagem
+                  img_path = "static/outputs/Persons/belted/passenger_" + uuid_detection + ".png"
+                  cv2.imwrite(img_path, passengerImg)                     
+                  ary_images.append(self.server+"/"+img_path)  
+                  print("[RESULTADO] Passageiro Com Cinto Encontrado no tempo: "+str(frame_seq / fps)+".")
+              
+              else:
+                 print("[RESULTADO] Passageiro Não detectado.")   
 
       else: 
 
@@ -149,7 +196,8 @@ class Classification():
         else:
           label = 'Nenhum Usuário sem cinto foi localizado.'
 
-        text = " Analise: {}".format(label)
+        text = ""
+        # text = " Analise: {}".format(label)
         if self.detect_belt == True:
           cv2.putText(frame, text, (35, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0), 2)
 
@@ -164,12 +212,27 @@ class Classification():
       
       # save video at S3
       #self.s3.Bucket('ekma').upload_file(Filename=output_video, Key=video_id, ExtraArgs={'ACL': 'public-read', 'ContentType': "video/avi"})
-        
+
+
+      # cloudinary.config( 
+      #   cloud_name = "dh6fx8j1d", 
+      #   api_key = "129264633655466", 
+      #   api_secret = "7xmWuIIUE3nRXTV2zfKyAuUcZ2Y",
+      #   secure = True
+      # )
+
+      #save video at cloudinary
+      # cloudinary.uploader.upload(output_video, public_id = video_id)
+
+
+      #return_cloudinary = cloudinary.uploader.upload_large(output_video, resource_type = "video", public_id = video_id)
+
       # remove file
       #os.remove(output_video)
     
     cv2.destroyAllWindows()
 
+    #url_video = return_cloudinary
     url_video = self.server+'/static/inputs/' + video_id
 
     return unbelted_seconds, ary_images, ary_names, url_video

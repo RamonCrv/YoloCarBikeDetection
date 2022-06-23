@@ -40,12 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', 
     'rest_framework', 
-    'widget_tweaks',
-    'crispy_forms',
     'api',
-    'corsheaders'
+    'corsheaders',
+    'cloudinary'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +60,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TEMPLATES = [
    {
@@ -85,16 +83,16 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'belt',
-        'USER': 'root',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',   
-        'PORT': '3306',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql', 
+#         'NAME': 'belt',
+#         'USER': 'root',
+#         'PASSWORD': '1234',
+#         'HOST': 'localhost',   
+#         'PORT': '3306',
+#     }
+# }
 
 
 # Password validation
@@ -136,7 +134,6 @@ APPEND_SLASH = False
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_URL   = '/media/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),

@@ -67,20 +67,20 @@
     <main>
         <!-- Home Banner -->
 
-        <section class="pb-4 analyze">
-            <div class="container">
+        <section class="pb-4 analyze" style="background:url('static/img/background-belt.jpg') center 100% no-repeat;">
+            <div class="container" >
                 <div class="row justify-content-center pt-15 min-vh-100">
-                    <div class="col-lg-9 col-xl-7 text-center pt-6">
-                        <h1 class="display-4 mb-3">Analise seu vídeo agora!</h1>
-                        <p class="lead">Selecione seu video e verifique o uso do cinto de segurança.</p>
+                    <div class="col-lg-9 col-xl-7 col-12 text-center pt-6">
+                        <h1 class="display-4 mb-3" style="color:#fff;">Analise seu vídeo agora!</h1>
+                        <!-- <p class="lead">Selecione seu video e verifique o uso do cinto de segurança.</p> -->
                         <form method='post' id='analyze' enctype="multipart/form-data" class="d-flex flex-row mb-2 p-1 input-group" >
                             <input required id="video" name='video' type="file" class="form-control form-control-lg rounded-0 border-0" placeholder="Select a video..." style="border: solid #dee2e6 !important;">
                             <button id="uploadButton" type='submit' class="btn btn-secondary rounded-0 flex-shrink-0"><icon class="fas fa-search"/></button>
-
-                            <div class="col-md-12">
-                                <label for="html">&nbsp;Tipo de Detecção:</label>&nbsp;&nbsp;
+                            <div class="col-12">
+                                <br/>
+                                <label for="html" style="color:#fff;">&nbsp;Tipo de Detecção:</label>&nbsp;&nbsp;
                                 <!-- <input type="radio" id="type_detection" name="type_detection" checked="" value="all"><label for="html">&nbsp;Violence + Gender</label>&nbsp;&nbsp;&nbsp;&nbsp; -->
-                                <input checked type="radio" id="type_detection" name="type_detection" value="belt"><label for="html">&nbsp;Cinto de Segurança</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input checked type="radio" id="type_detection" name="type_detection" value="belt"><label for="html" style="color:#fff;">&nbsp;Cinto de Segurança</label>&nbsp;&nbsp;&nbsp;&nbsp;
                             <!-- <input type="radio" id="type_detection" name="type_detection" value="gender"><label for="html">&nbsp;Gender only</label> -->
                             </div>
 
@@ -91,36 +91,35 @@
         </section>
 
 
-
-
-
         <section class="pb-4 result" style='display:none'>
             <div class="container position-relative">
-                <div class="row min-vh-100 align-items-center py-5">
-                    <h1>Resultado...</h1>
-                    <div id="video_analyze" class="col-lg-6 py-10">
+                <div class="row">
+                    <h1 class="m-3">Resultado...</h1>
+                    <div id="video_analyze" class="col-lg-6">
                         <video width="100%" id="video_player" class="max-width-120" controls>
                             <source src='' type=''>
                         </video>
                     </div>
-                    <div class="col-lg-6 col-xl-5 py-8 mr-auto">
-                        <div class="display-6 mb-3"></div>
-                        <div class='display-6 duration'></div>
-                        <div class='display-6 unbelted_driver'></div>      
-                        <div class='display-6 unbelted_passenger'></div>
-                        <div class="pt-3 text-right" style="margin-top: 10em">
-                             <a href="index.html">Analisar outro vídeo</a>
+                    <div class="col-lg-6">
+                        <div style='font-size:18px'  class="display-6 mb-3"></div>
+                        <div style='font-size:18px'  class='mt-1 display-6 duration'></div>
+                        <div style='font-size:18px'  class='mt-1 display-6 unbelted_driver'></div>      
+                        <div style='font-size:18px'  class='mt-1 display-6 unbelted_passenger'></div>
+                        <div style='font-size:18px'  class="mt-1 display-6 text-center mt-3">
+                             <a class='btn btn-sm btn-secondary' href="index.html">Analisar outro vídeo</a>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+
         <!-- End Home Banner -->
         <!-- Section -->
         <section class="section bg-gray-100 result" style='display:none'>
             <div class="container">
-                <h1>Cenas Encontradas</h1>
-                <div class="row align-items-center justify-content-between" style="margin-top: 3em">
+                <div class="row" >
+                    <h1>Cenas Encontradas</h1>
                     <div class="tab-style-3 mt-3">
                         <div id="timeline_scene" class="row">                         
                            
@@ -186,27 +185,28 @@
                         <ul class="list-type-02 theme">
                             <li><i class="fas fa-check"></i>RESTful</li>
                             <li><i class="fas fa-check"></i>Grátis</li>
-                            <li><i class="fas fa-check"></i>Tamanho Máximo do Vídeo: 50MB</li>
-                            <li><i class="fas fa-check"></i>Apenas Extensão <span class="badge bg-secondary">.avi</span> </li>
-                            <li><i class="fas fa-check"></i>URL: http://seudominio.com/analyze/</li>
-                            <li><i class="fas fa-check"></i>Enviar solicitação via método POST com o vídeo para o corpo com o nome 'vídeo'</li>
-                            <li><i class="fas fa-check"></i>E.g.:<code>
-{
-    "driver_detected": true,
-    "driver_has_belt": true,
-    "passenger_detected": true,
-    "passenger_has_belt": false,
-    "fps": 30,
-    "frame_count": 140,
-    "duration": 4.67,
-    "no_belt_seconds": [1.1, 1.8],
-    "processing_time": 28.555,
-    "url_frames": [
-        "https://ekma.s3-us-west-1.amazonaws.com/36b98d44-c3e7-11eb-83b0-0242ac120002.jpg",
-        "https://ekma.s3-us-west-1.amazonaws.com/36b98d44-c3e7-11eb-83b0-0242ac120002.jpg"
-    ]
-}
-</code></li>
+                            <li><i class="fas fa-check"></i>Tamanho Máximo do Vídeo: 100MB</li>
+                            <li><i class="fas fa-check"></i>Extensões suportadas: <span class="badge bg-secondary">.avi</span>  <span class="badge bg-secondary">.mp4</span> <span class="badge bg-secondary">.MOV</span></li>
+                            <li><i class="fas fa-check"></i>URL: http://127.0.0.1:8000/analyze/</li>
+                            <li><i class="fas fa-check"></i>Enviar solicitação via método POST com o vídeo para o corpo com o nome 'video'</li>
+                            <li><i class="fas fa-check"></i>Exemplo de Retorno:<br/><code>
+                                                            {<br/>
+                                                                "driver_detected": true,<br/>
+                                                                "driver_has_belt": true,<br/>
+                                                                "passenger_detected": true,<br/>
+                                                                "passenger_has_belt": false,<br/>
+                                                                "fps": 30,<br/>
+                                                                "frame_count": 140,<br/>
+                                                                "duration": 4.67,<br/>
+                                                                "no_belt_seconds": [1.1, 1.8],<br/>
+                                                                "processing_time": 28.555,<br/>
+                                                                "url_frames": [<br/>
+                                                                    "https://image_path.com/image_name.jpg",<br/>
+                                                                    "https://image_path.com/image_name.jpg"<br/>
+                                                                ]<br/>
+                                                            }
+                                                            </code>
+</li>
                         </ul>
                     </div>
                 </div>
@@ -251,7 +251,7 @@
                         </div>
                     </div>
                     <div class="col-md-12 text-center">
-                        <p class="m-0 small">© 2021 copyright all right reserved</p>
+                        <p class="m-0 small">© 2022 copyright all right reserved</p>
                     </div>
                 </div>
             </div>

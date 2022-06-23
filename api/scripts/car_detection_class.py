@@ -58,7 +58,7 @@ class CarDetection():
       if x >= cx and (x+w) <= (cx+cw) and y >= cy and (y+h) <= (cy+ch): 
         if x+(w/2) > cx+(cw/2):
           driver = frame[y:y + h, x:x + w]
-          cv2.imwrite("static/outputs/Persons/driver_" + str(x) + str(y) + "_" + str(seconds) + '.png', driver)
+          # cv2.imwrite("static/outputs/Persons/driver_" + str(x) + str(y) + "_" + str(seconds) + '.png', driver)
           return True, driver
     return False, driver
 
@@ -72,7 +72,7 @@ class CarDetection():
       if x >= cx and (x+w) <= (cx+cw) and y >= cy and (y+h) <= (cy+ch): 
         if x+(w/2) < cx+(cw/2):
           passenger = frame[y:y + h, x:x + w]
-          cv2.imwrite("static/outputs/Persons/passenger_" + str(x) + str(y) + "_" + str(seconds) + '.png', passenger)
+          # cv2.imwrite("static/outputs/Persons/passenger_" + str(x) + str(y) + "_" + str(seconds) + '.png', passenger)
           return True, passenger
     return False, passenger
     

@@ -1,5 +1,16 @@
+# Ignore os arquivos de sistema do Mac
+.DS_store
+
 api/models/belts.model
+
 api/yolo
+!api/yolo/index
+
 api/static/inputs/*
-api/static/outputs/videos/*
-api/static/outputs/frames/*
+!api/static/inputs/index
+
+api/static/outputs/belted/*
+!api/static/outputs/belted/index
+
+api/static/outputs/unbelted/*
+!api/static/outputs/belted/index

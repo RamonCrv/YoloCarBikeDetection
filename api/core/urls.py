@@ -7,7 +7,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('analyze/', views.analyze)    
-] + static(
-    settings.STATIC_URL, 
-    document_root = settings.STATIC_ROOT)
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
